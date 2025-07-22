@@ -70,6 +70,22 @@ const malla = {
 };
 
 const contenedor = document.getElementById("malla");
+const progresoBarra = document.getElementById("progresoBarra");
+const progresoTexto = document.getElementById("progresoTexto");
+
+const estado = JSON.parse(localStorage.getItem("estadoMalla")) || {};
+
+function guardarEstado() {
+  localStorage.setItem("estadoMalla", JSON.stringify(estado));
+}
+
+function calcularProgreso() {
+  const total = document.querySelectorAll(".ramo").length;
+  const completados = document.querySelectorAll(".ramo.completado").length;
+  const porcentaje = Math.round((completados / total) * 100);
+  progresoBarra.style.width = `${porcentaje}%`;
+  progresoTexto.textContent = `${porcentaje}%`;
+}
 
 Object.entries(malla).forEach(([semestre, ramos]) => {
   const divSemestre = document.createElement("div");
@@ -84,8 +100,16 @@ Object.entries(malla).forEach(([semestre, ramos]) => {
     divRamo.className = "ramo";
     divRamo.textContent = ramo;
 
+    // Cargar estado desde localStorage
+    if (estado[ramo]) {
+      divRamo.classList.add("completado");
+    }
+
     divRamo.onclick = () => {
       divRamo.classList.toggle("completado");
+      estado[ramo] = divRamo.classList.contains("completado");
+      guardarEstado();
+      calcularProgreso();
     };
 
     divSemestre.appendChild(divRamo);
@@ -93,3 +117,5 @@ Object.entries(malla).forEach(([semestre, ramos]) => {
 
   contenedor.appendChild(divSemestre);
 });
+
+calcularProgreso();
